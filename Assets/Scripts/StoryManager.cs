@@ -15,6 +15,7 @@ public class StoryManager : MonoBehaviour
     [SerializeField] private TextAsset inkJSON;
     [SerializeField] private TextMeshProUGUI storyText;
     [SerializeField] private StoryChoice storyChoice;
+    [SerializeField] private Button continueButton;
 
     //this is awful, should probably just make the choice buttons via script at start
     [SerializeField] private StoryChoice storyChoice0;
@@ -64,23 +65,21 @@ public class StoryManager : MonoBehaviour
     private void Update()
     {
         LayoutRebuilder.MarkLayoutForRebuild(storyPanel.GetComponent<RectTransform>());
-        if (Input.GetMouseButtonDown(0))
-        {
-            ContinueStory();
-            
-        }
     }
 
-    private void ContinueStory()
+    public void ContinueStory()
     {
         if (story.canContinue)
         {
             TextMeshProUGUI tempText = Instantiate(storyText);
             tempText.text = story.Continue();
             tempText.transform.SetParent(storyPanel.transform, false);
+            continueButton.transform.SetSiblingIndex(storyPanel.transform.childCount - 1);
+            continueButton.Select();
         }
         else if (story.currentChoices.Count > 0 && !playerInChoice)
         {
+            continueButton.gameObject.SetActive(false);
             playerInChoice = true;
             int buttonIndex = 0;
 
@@ -98,7 +97,9 @@ public class StoryManager : MonoBehaviour
                 choiceButton.transform.SetParent(storyPanel.transform, false);
 
                 buttonIndex++;
+
             }
+            activeChoiceButtons[0].GetComponent<Button>().Select();
         }
         else 
         {
@@ -120,5 +121,6 @@ public class StoryManager : MonoBehaviour
         story.ChooseChoiceIndex(choiceIndex);
         playerInChoice = false;
         ContinueStory();
+        continueButton.gameObject.SetActive(true);
     }
 }
